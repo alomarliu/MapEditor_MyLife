@@ -25,7 +25,7 @@ public class ModelCreater2 : EditorWindow
 	private int _tab 						= 0;
 	private BetterList<Item> _itemList = new BetterList<Item>();
 	private Texture2D[] txtAry;
-	
+
 	//比例
 	private Vector3 scale;
 
@@ -103,8 +103,11 @@ public class ModelCreater2 : EditorWindow
 	 * ===========================================*/
 	void OnDisable()
 	{
+		//txtAry = null;
+
 		// 釋放
 		foreach (Item item in _itemList) DestroyTexture(item);
+		_itemList.Clear();
 
 		GameObject.DestroyImmediate(MapManager.instance.detectPlane);
 		MapManager.instance.detectPlane = null;
@@ -124,7 +127,7 @@ public class ModelCreater2 : EditorWindow
 	{
 		if (item != null && item.tex != null)
 		{
-			DestroyImmediate(item.tex);
+			GameObject.DestroyImmediate(item.tex);
 			item.tex = null;
 		}
 	}
@@ -181,6 +184,9 @@ public class ModelCreater2 : EditorWindow
 	
 	void OnGUI()
 	{		
+		Event currentEvent = Event.current;
+		EventType type = currentEvent.type;
+		Debug.Log(type);
 		if(_prefabTemp == null || _prefabTemp.Length <= 0)
 			return;
 
@@ -206,7 +212,6 @@ public class ModelCreater2 : EditorWindow
 				if (_tab != newTab)
 				{
 					_tab = newTab;
-					
 					// 準備貼圖
 					prepareTexture();
 				}
