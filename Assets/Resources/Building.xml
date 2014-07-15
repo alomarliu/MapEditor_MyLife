@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:704373153b93fac3bd889e94e8d8b58f$ -->
+<TextureAtlas imagePath="Building.png">
+    <SubTexture name="B000" x="500" y="633" width="100" height="58"/>
+    <SubTexture name="B001" x="300" y="1576" width="200" height="227"/>
+    <SubTexture name="B002" x="0" y="1429" width="300" height="311"/>
+    <SubTexture name="B003" x="0" y="0" width="400" height="378"/>
+    <SubTexture name="B004" x="500" y="1718" width="200" height="175"/>
+    <SubTexture name="B005" x="1100" y="0" width="300" height="245"/>
+    <SubTexture name="B007" x="700" y="232" width="300" height="222"/>
+    <SubTexture name="B008" x="700" y="454" width="300" height="219"/>
+    <SubTexture name="B012" x="0" y="1099" width="300" height="330"/>
+    <SubTexture name="B013" x="1400" y="0" width="300" height="269"/>
+    <SubTexture name="B014" x="400" y="0" width="300" height="361"/>
+    <SubTexture name="B016" x="1381" y="269" width="200" height="174"/>
+    <SubTexture name="B019" x="500" y="1305" width="200" height="211"/>
+    <SubTexture name="B500" x="1468" y="443" width="76" height="67"/>
+    <SubTexture name="B501" x="1300" y="245" width="81" height="164"/>
+    <SubTexture name="B502" x="1581" y="269" width="111" height="177"/>
+    <SubTexture name="C000" x="500" y="1893" width="200" height="116"/>
+    <SubTexture name="C001" x="500" y="361" width="200" height="272"/>
+    <SubTexture name="C002" x="0" y="746" width="300" height="353"/>
+    <SubTexture name="C005" x="1700" y="0" width="300" height="287"/>
+    <SubTexture name="C013" x="0" y="1740" width="300" height="306"/>
+    <SubTexture name="C019" x="300" y="1803" width="200" height="224"/>
+    <SubTexture name="C500" x="1000" y="420" width="183" height="235"/>
+    <SubTexture name="C501" x="1359" y="443" width="109" height="194"/>
+    <SubTexture name="C502" x="300" y="1006" width="246" height="299"/>
+    <SubTexture name="D000" x="1000" y="245" width="300" height="175"/>
+    <SubTexture name="D001" x="300" y="378" width="200" height="323"/>
+    <SubTexture name="D013" x="0" y="378" width="300" height="368"/>
+    <SubTexture name="D019" x="300" y="1305" width="200" height="271"/>
+    <SubTexture name="D500" x="500" y="1516" width="195" height="202"/>
+    <SubTexture name="D501" x="1183" y="420" width="176" height="241"/>
+    <SubTexture name="D502" x="300" y="701" width="253" height="305"/>
+    <SubTexture name="E000" x="700" y="0" width="400" height="232"/>
+</TextureAtlas>
