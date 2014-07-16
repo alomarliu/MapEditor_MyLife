@@ -29,6 +29,8 @@ public class ModelCreater2 : EditorWindow
 	//比例
 	private Vector3 scale;
 
+	private bool awake = false;
+
 	void OnEnable()
 	{
 		mapManager = GameObject.Find("MapManager");
@@ -103,8 +105,6 @@ public class ModelCreater2 : EditorWindow
 	 * ===========================================*/
 	void OnDisable()
 	{
-		//txtAry = null;
-
 		// 釋放
 		foreach (Item item in _itemList) DestroyTexture(item);
 		_itemList.Clear();
@@ -117,7 +117,7 @@ public class ModelCreater2 : EditorWindow
 		MapManager.instance.clearGridData();
 
 		GameObject.DestroyImmediate(mapManager);
-		GameObject.DestroyImmediate(MapManager.instance.detectPlane);
+		mapManager = null;
 	}
 	
 	/**=============================================
@@ -131,7 +131,14 @@ public class ModelCreater2 : EditorWindow
 			item.tex = null;
 		}
 	}
+	static void Init() 
+	{
+		EditorWindow editorWindow = GetWindow(typeof(ModelCreater2));
+		editorWindow.autoRepaintOnSceneChange = false;
 
+		Debug.Log("init");
+		//editorWindow.Show();
+	}
 	/**=============================================
 	 * 準備貼圖
 	 * ===========================================*/
@@ -180,15 +187,22 @@ public class ModelCreater2 : EditorWindow
 
 			txtAry[i] = tarTxt;
 		}
+
+		awake = true;
 	}
 	
 	void OnGUI()
 	{		
 		Event currentEvent = Event.current;
 		EventType type = currentEvent.type;
-		Debug.Log(type);
+
 		if(_prefabTemp == null || _prefabTemp.Length <= 0)
 			return;
+
+		if(awake)
+		{
+			awake = false;
+		}
 
 		GUILayout.BeginVertical();
 		{
