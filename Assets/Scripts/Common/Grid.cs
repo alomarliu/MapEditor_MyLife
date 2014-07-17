@@ -29,7 +29,7 @@ public class Grid : MonoBehaviour {
 
 		return new Vector3(x, y);
 	}
-	
+
 	void OnDrawGizmos() 
 	{ 
 		if( displayGrid ) 
@@ -99,4 +99,35 @@ public class Grid : MonoBehaviour {
 			}
 		} 
 	} 
+	
+	public string lastTooltip = " ";
+
+	/*
+	void OnGUI()
+	{		
+		//GUI.Button(new Rect(10, 10, 100, 20), new GUIContent("Click me", "This is the tooltip"));
+		//GUI.Label(new Rect(10, 40, 100, 40), GUI.tooltip);
+		
+		GUILayout.Button(new GUIContent("Play Game", "Button1"));
+		GUILayout.Button(new GUIContent("Quit", "Button2"));
+
+		if (Event.current.type == EventType.Repaint && GUI.tooltip != lastTooltip) 
+		{
+			if (lastTooltip != "")
+				SendMessage(lastTooltip + "OnMouseOut", SendMessageOptions.DontRequireReceiver);
+			
+			if (GUI.tooltip != "")
+				SendMessage(GUI.tooltip + "OnMouseOver", SendMessageOptions.DontRequireReceiver);
+			
+			lastTooltip = GUI.tooltip;
+			Debug.Log(lastTooltip);
+		}
+	}
+	void Button1OnMouseOver() {
+		Debug.Log("Play game got focus");
+	}
+	void Button2OnMouseOut() {
+		Debug.Log("Quit lost focus");
+	}
+	*/
 } 

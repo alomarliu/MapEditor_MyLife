@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Xml;
 using UnityEditor;
+using System.Collections.Generic;
 
 public class MapManager 
 {
@@ -14,15 +15,18 @@ public class MapManager
 	/** 選擇的項目 */
 	public Item selectItem;
 	/** 最大物件層級 */
-	public const int MAX_LAYERCOUNT 		= 1;
+	public const int MAX_LAYERCOUNT 		= 3;
 	/** 目前層級 */
 	public int nowLayer						= 0;
+
+	private int _lastCellCount				= 10;
 
 	private Vector3 putPosition 			= new Vector3(0,0,0);
 	/** 感應區 */
 	public GameObject detectPlane;
 
-	private GridData[,] _gridData;
+	private Dictionary<int, GridData[,]> _gridDic = new Dictionary<int, GridData[,]>();
+	//private GridData[,] _gridData;
 
 	/** manager 主 object */
 	public GameObject mainObj 				= null;
@@ -48,13 +52,17 @@ public class MapManager
 		Transform child;
 		
 		// 刪除物件
-		for(int i = 0; i < childCount; ++i)
+		while(childCount > 0)
 		{
-			child = mainObj.transform.GetChild(i) as Transform;
+			child = mainObj.transform.GetChild(0) as Transform;
 			
 			if(child)
 				GameObject.DestroyImmediate(child.gameObject);
+
+			childCount = mainObj.transform.childCount;
 		}
+
+		_gridDic.Clear();
 	}
 	
 	/**=============================================
@@ -64,7 +72,8 @@ public class MapManager
 	{
 		string layerName = "Layer";
 		GameObject layer;
-
+		GridData[,] gridData;
+		
 		// 清除階層物件
 		ClearLayer();
 
@@ -80,9 +89,14 @@ public class MapManager
 			}
 			
 			layers[j] = layer;
+			
+			// 改變資料結構大小
+			gridData = new GridData[grid.cellCount,grid.cellCount];
+			_gridDic[j] = gridData;
 		}
 	}
-	
+
+
 	/**=============================================
 	 * 
 	 * ===========================================*/
@@ -93,21 +107,19 @@ public class MapManager
 		if(selectItem == null)
 			return;
 
-		if(_gridData == null || _gridData.Length != Mathf.Pow(grid.cellCount, 2))
+		// cell 格數有改變
+		if(_lastCellCount != grid.cellCount)
 		{
-			// 改變資料結構大小
-			_gridData = new GridData[grid.cellCount,grid.cellCount];
-
 			// 建立階層
 			CreateLayer();
+
+			_lastCellCount = grid.cellCount;
 		}
 
 		if(e.type == EventType.MouseDown && e.button == 0 ) 
 		{ 
 			e.Use();
 			putObject();
-			
-			//deleteObject();
 		}
 		else if(e.type == EventType.MouseMove)
 		{
@@ -206,11 +218,12 @@ public class MapManager
 			}
 		}
 				
-		GUIStyle style = new GUIStyle();
+		GUIStyle style = new GUIStyle(GUI.skin.label);
 		style.fontSize = 20;
 
 		Handles.BeginGUI();	
-		GUILayout.Label("按住Ctrl可連續建立物件, 按住Alt可刪除物件");
+		GUILayout.Label("按住Ctrl可連續建立物件, 按住Alt可刪除物件", style); 
+
 		Handles.EndGUI();
 	}
 	
@@ -249,7 +262,8 @@ public class MapManager
 		tt.transform.position = putPosition; 
 		//tt.transform.hideFlags = HideFlags.NotEditable;
 		tt.hideFlags = HideFlags.NotEditable | HideFlags.HideInHierarchy;
-		sr.sortingOrder = grid.cellCount * (int)aryIdx.x  + (int)aryIdx.y;
+		sr.sortingLayerID = nowLayer+1;
+		sr.sortingOrder = grid.cellCount * (int)aryIdx.x  + (int)aryIdx.y;// + nowLayer * grid.cellCount * grid.cellCount;
 		
 		// 設定 grid 資料
 		setGridData(aryIdx, unit, selectItem.guid, tt);
@@ -322,13 +336,14 @@ public class MapManager
 		int size = unit * unit;
 		int row = 0;
 		int col = 0;
+		GridData[,] gridAry = _gridDic[nowLayer];
 		GridData data;
 		
 		for(int i = 0; i < size; ++i)
 		{			
 			row = Mathf.FloorToInt(i / unit) + (int)aryIdx.x;
 			col = i % unit + (int)aryIdx.y;
-			data = _gridData[row,col];
+			data = gridAry[row,col];
 
 			// 該格有物件
 			if(data != null)
@@ -354,13 +369,14 @@ public class MapManager
 
 		int row = 0;
 		int col = 0;
-
-		GridData data = _gridData[(int)aryIdx.x, (int)aryIdx.y];
+		
+		GridData[,] gridAry = _gridDic[nowLayer];
+		GridData data = gridAry[(int)aryIdx.x, (int)aryIdx.y];
 
 		if(data == null)
 			return;
 
-		data = _gridData[(int)data.baseAryIdx.x, (int)data.baseAryIdx.y];
+		data = gridAry[(int)data.baseAryIdx.x, (int)data.baseAryIdx.y];
 
 		if(data == null)
 			return;
@@ -374,12 +390,12 @@ public class MapManager
 			row = Mathf.FloorToInt(i / unit) + (int)data.baseAryIdx.x;
 			col = i % unit + (int)data.baseAryIdx.y;
 
-			temp = _gridData[row,col];
+			temp = gridAry[row,col];
 
 			// 該格有物件
 			if(temp != null)
 			{
-				_gridData[row,col] = null;
+				gridAry[row,col] = null;
 
 				if(temp.obj != null)
 				{
@@ -406,7 +422,8 @@ public class MapManager
 		int size = unit * unit;
 		int row = 0;
 		int col = 0;
-		Vector3 baseIdx = new Vector3();
+		Vector3 baseIdx = new Vector3();		
+		GridData[,] gridAry = _gridDic[nowLayer];
 
 		for(int i = 0; i < size; ++i)
 		{
@@ -420,7 +437,7 @@ public class MapManager
 			row = Mathf.FloorToInt(i / unit) + (int)aryIdx.x;
 			col = i % unit + (int)aryIdx.y;
 
-			_gridData[row,col] = data;
+			gridAry[row,col] = data;
 
 			if(i == 0) baseIdx = new Vector3((float)row, (float)col);
 			data.baseAryIdx = baseIdx;
@@ -432,6 +449,6 @@ public class MapManager
 
 	public void clearGridData()
 	{
-		_gridData = null;
+		_gridDic.Clear();
 	}
 }

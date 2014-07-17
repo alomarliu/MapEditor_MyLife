@@ -23,16 +23,30 @@ public class ModelCreater2 : EditorWindow
 	
 	private Vector2 mPos			 		= Vector2.zero;
 	private int _tab 						= 0;
-	private BetterList<Item> _itemList = new BetterList<Item>();
-	private Texture2D[] txtAry;
+	private BetterList<Item> _itemList 		= new BetterList<Item>();
+	private GUIContent[] _content;
 
-	//比例
+	// 比例
 	private Vector3 scale;
-
-	private bool awake = false;
-
+	/** 選擇項目的style */
+	private GUIStyle _itemStyle;
+	/** 選擇項目的style */
+	private GUIStyle _toolTipStype;
+	
+	/**=============================================
+	 * 啟動時
+	 * ===========================================*/
 	void OnEnable()
-	{
+	{		
+		Debug.Log("OnEnable");
+		_itemStyle = new GUIStyle("Button");
+		_itemStyle.fixedHeight = 50;
+		_itemStyle.fixedWidth = 50;
+
+		_toolTipStype = new GUIStyle();
+		_toolTipStype.normal.background = UnityEditor.EditorGUIUtility.whiteTexture;
+		_toolTipStype.alignment = TextAnchor.MiddleCenter;
+
 		mapManager = GameObject.Find("MapManager");
 		
 		if(!mapManager)
@@ -84,8 +98,8 @@ public class ModelCreater2 : EditorWindow
 			//detectPlane.transform.parent = mapManager.transform;
 			detectPlane.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
 
-			SpriteRenderer sr = detectPlane.GetComponent<SpriteRenderer>();
-			sr.sortingOrder = 9999;
+			//SpriteRenderer sr = detectPlane.GetComponent<SpriteRenderer>();
+			//sr.sortingOrder = 9999;
 		}
 
 		MapManager.instance.detectPlane = detectPlane;
@@ -105,6 +119,7 @@ public class ModelCreater2 : EditorWindow
 	 * ===========================================*/
 	void OnDisable()
 	{
+		Debug.Log("OnDisable");
 		// 釋放
 		foreach (Item item in _itemList) DestroyTexture(item);
 		_itemList.Clear();
@@ -131,14 +146,7 @@ public class ModelCreater2 : EditorWindow
 			item.tex = null;
 		}
 	}
-	static void Init() 
-	{
-		EditorWindow editorWindow = GetWindow(typeof(ModelCreater2));
-		editorWindow.autoRepaintOnSceneChange = false;
 
-		Debug.Log("init");
-		//editorWindow.Show();
-	}
 	/**=============================================
 	 * 準備貼圖
 	 * ===========================================*/
@@ -161,7 +169,7 @@ public class ModelCreater2 : EditorWindow
 		_itemList.Clear();
 
 		int size = spriteList.size;
-		txtAry = new Texture2D[size];
+		_content = new GUIContent[size];
 
 		for(int i = 0; i < spriteList.size; ++i)
 		{
@@ -185,27 +193,26 @@ public class ModelCreater2 : EditorWindow
 			item.unit = Mathf.CeilToInt((float)tarTxt.width / CameraConfig.pixelsPerUnit);
 			_itemList.Add(item);
 
-			txtAry[i] = tarTxt;
+			_content[i] = new GUIContent(tarTxt, sName);
 		}
-
-		awake = true;
 	}
 	
+	/**=============================================
+	 * 準備貼圖
+	 * ===========================================*/
 	void OnGUI()
 	{		
 		Event currentEvent = Event.current;
-		EventType type = currentEvent.type;
 
 		if(_prefabTemp == null || _prefabTemp.Length <= 0)
 			return;
 
-		if(awake)
-		{
-			awake = false;
-		}
-
 		GUILayout.BeginVertical();
 		{
+			// 選擇要編輯的layer
+			string[] str = initLayerName();
+			MapManager.instance.nowLayer =  EditorGUILayout.Popup(MapManager.instance.nowLayer, str);
+
 			// 選取prefab的頁籤
 			GUILayout.BeginHorizontal();
 			{
@@ -232,28 +239,44 @@ public class ModelCreater2 : EditorWindow
 			}			
 			GUILayout.EndHorizontal();
 
-			
 			int HCellCount = Mathf.FloorToInt( (Screen.width - 12) / 54.0f);
 			//int oldSel = 0;
 
-			GUIStyle gs = new GUIStyle(GUI.skin.button);
-			gs.fixedWidth = 50;
-			gs.fixedHeight = 50;	
-			
 			GUILayout.BeginHorizontal();
 			{
 				mPos = GUILayout.BeginScrollView(mPos);
 				{
 					//oldSel = selItem;
-					selItem = GUILayout.SelectionGrid(selItem, txtAry, HCellCount, gs );
+					selItem = GUILayout.SelectionGrid(selItem, _content, HCellCount, _itemStyle);
 
 					MapManager.instance.selectItem = _itemList[selItem];
 				}
 				GUILayout.EndScrollView();
 			}
 			GUILayout.EndHorizontal();
-
 		}
 		GUILayout.EndVertical();
+
+		if(GUI.tooltip != "")
+		{
+			Vector2 size = _toolTipStype.CalcSize(new GUIContent(GUI.tooltip));
+			Vector2 pos = currentEvent.mousePosition;
+			pos.x -= size.x * 0.5f;
+			pos.y += 10f;
+			GUI.backgroundColor = new Color(0.9f, 0.9f, 0.9f);
+			GUI.Label(new Rect(pos.x, pos.y, size.x + 10, size.y + 10), GUI.tooltip, _toolTipStype);
+		}
+	}
+
+	string[] initLayerName()
+	{
+		string[] str = new string[MapManager.MAX_LAYERCOUNT];
+
+		for(int i = 0; i < MapManager.MAX_LAYERCOUNT; ++i)
+		{
+			str[i] = "Layer" + (i+1);
+		}
+
+		return str;
 	}
 }
